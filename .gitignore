@@ -1,0 +1,16 @@
+# Configuración local
+config.json
+
+# Datos descargados
+temp/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Configuración de VS Code (opcional)
+.vscode/
