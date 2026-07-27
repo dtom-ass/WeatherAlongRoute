@@ -3,14 +3,17 @@ import json
 import glob
 
 # Seleccionamos fecha y hora del archivo
-target_datetime = str(time.strftime("%Y-%m-%d") + " 16:00")
+target_datetime = str(time.strftime("%Y-%m-%d") + " 16:00") # HORA!
 
 print("SEARCHING: " + target_datetime)
-selected_date = "20260724"
+selected_date = "20260727"
 print("DATE SELECTED: "+ selected_date)
 
 # Leer los archivos descargados
 files = glob.glob(f'temp/weather_{selected_date}_*.json')
+
+forecast_data = []
+
 
 for file_name in files:
     with open(file_name, "r") as file:
@@ -27,5 +30,12 @@ for file_name in files:
               print("Humidity: ", hourly_forecast[hour]["humidity"])
               print("Cloud: ", hourly_forecast[hour]["cloud"])
               print("Chance Of Rain: ", hourly_forecast[hour]["chance_of_rain"])
+              # Guardamos data en un diccionario.
+              forecast_data.append({
+                "location": weather_data["location"]["name"],
+                "humidity": hourly_forecast[hour]["humidity"],
+                "cloud": hourly_forecast[hour]["cloud"],
+                "chance_of_rain": hourly_forecast[hour]["chance_of_rain"]
+                })
               break    
         hour += 1
