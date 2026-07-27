@@ -1,16 +1,24 @@
-# Configuración local
+# API configuration
 config.json
 
-# Datos descargados
+# Generated weather files
 temp/
 
-# Caché de Python
+# Generated training datasets
+training/
+
+# Python cache
 __pycache__/
 *.py[cod]
 
-# Entornos virtuales
-.venv/
+# Virtual environments
 venv/
+.venv/
 
-# Configuración de VS Code (opcional)
+# IDE files
 .vscode/
+.idea/
+
+# Operating System
+.DS_Store
+Thumbs.db
