@@ -14,7 +14,7 @@ try:
         config = json.load(file)
 
     API_KEY = config["WEATHER_API_KEY"]
-    # DEFINIR RUTA
+# DEFINIR RUTA
     locations = config["LOCATIONS"]
     print("OK | API Key loaded")
 

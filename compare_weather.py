@@ -85,7 +85,6 @@ for forecast_file in forecast_files:
 
 # Creamos el registro
             record = {
-
                 "date": selected_date,
 
                 "hour": target_hour,
@@ -99,12 +98,10 @@ for forecast_file in forecast_files:
                 "history_humidity": history_record["humidity"],
                 "history_cloud": history_record["cloud"],
                 "history_precip_mm": history_record["precip_mm"]
-
             }
 
             training_data.append(record)
     except Exception as e:
-
         print(f"FAIL | Error processing {forecast_file}")
         print(e)
 
@@ -114,7 +111,6 @@ output_file = f"training/training_{selected_date}.json"
 try:
 
     with open(output_file, "w", encoding="utf-8") as file:
-
         json.dump(
             training_data,
             file,
@@ -127,6 +123,5 @@ try:
     print("SAVED |", output_file)
 
 except Exception as e:
-
     print("FAIL | Could not save dataset")
     print(e)
