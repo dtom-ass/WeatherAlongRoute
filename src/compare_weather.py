@@ -115,18 +115,25 @@ for forecast_file in forecast_files:
 
 # Creamos el registro
             record = {
+
                 "date": selected_date,
-
-                "hour": target_hour,
-
+                "hour": int(target_hour[:2]),
                 "location": forecast_data["location"]["name"],
 
+                # Forecast features
+                "forecast_temp_c": forecast_record["temp_c"],
+                "forecast_feelslike_c": forecast_record["feelslike_c"],
+                "forecast_wind_kph": forecast_record["wind_kph"],
+                "forecast_pressure_mb": forecast_record["pressure_mb"],
                 "forecast_humidity": forecast_record["humidity"],
                 "forecast_cloud": forecast_record["cloud"],
+                "forecast_precip_mm": forecast_record["precip_mm"],
                 "forecast_chance_of_rain": forecast_record["chance_of_rain"],
-
-                "history_humidity": history_record["humidity"],
-                "history_cloud": history_record["cloud"],
+                "forecast_dewpoint_c": forecast_record["dewpoint_c"],
+                "forecast_uv": forecast_record["uv"],
+                "forecast_vis_km": forecast_record["vis_km"],
+                "forecast_is_day": forecast_record["is_day"],
+                # Target
                 "history_precip_mm": history_record["precip_mm"]
             }
 

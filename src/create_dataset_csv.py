@@ -20,7 +20,20 @@ rows = []
 for item in data:
 
     row = {
-        # "hour": int(item["hour"].split(":")[0]), // Datos por hora.
+
+        "hour": item["hour"], # Datos por hora.
+
+        "forecast_temp_c":
+            item["forecast_temp_c"],
+
+        "forecast_feelslike_c":
+            item["forecast_feelslike_c"],
+
+        "forecast_wind_kph":
+            item["forecast_wind_kph"],
+
+        "forecast_pressure_mb":
+            item["forecast_pressure_mb"],
 
         "forecast_humidity":
             item["forecast_humidity"],
@@ -28,11 +41,27 @@ for item in data:
         "forecast_cloud":
             item["forecast_cloud"],
 
+        "forecast_precip_mm":
+            item["forecast_precip_mm"],
+
         "forecast_chance_of_rain":
             item["forecast_chance_of_rain"],
 
+        "forecast_dewpoint_c":
+            item["forecast_dewpoint_c"],
+
+        "forecast_uv":
+            item["forecast_uv"],
+
+        "forecast_vis_km":
+            item["forecast_vis_km"],
+
+        "forecast_is_day":
+            item["forecast_is_day"],
+
+        # Target
         "history_precip_mm":
-            item["history_precip_mm"],
+            item["history_precip_mm"]
 
     }
 
