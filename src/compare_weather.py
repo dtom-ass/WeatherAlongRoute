@@ -6,6 +6,8 @@ import json
 from datetime import datetime, timedelta
 
 # List of hours to compare.
+""" 
+SUSTITUIMOS la lista completa para ejecutar entrenamiento y tener mas datos.
 HOURS = [
     "04:00",
     "05:00",
@@ -15,6 +17,34 @@ HOURS = [
     "17:00"
 ]
 
+"""
+HOURS = [
+    "00:00",
+    "01:00",
+    "02:00",
+    "03:00",
+    "04:00",
+    "05:00",
+    "06:00",
+    "07:00",
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+    "21:00",
+    "22:00",
+    "23:00"
+]
+
 # Fecha del archivo del día anterior a hoy.
 selected_date = (
     datetime.today() - timedelta(days=1)
@@ -22,23 +52,23 @@ selected_date = (
 print("DATE SELECTED:", selected_date)
 
 # Creamos carpeta para el dataset
-os.makedirs("training", exist_ok=True)
+os.makedirs("data/training", exist_ok=True)
 
 training_data = []
 
 # Buscamos los archivos
-forecast_files = glob.glob(f"temp/weather_{selected_date}_*.json")
+forecast_files = glob.glob(f"data/forecast/weather_{selected_date}_*.json")
 print("FORECAST FILES:", len(forecast_files))
 
 # Recorremos todos los documentos
 for forecast_file in forecast_files:
     location_id = forecast_file.replace(
-        f"temp\\weather_{selected_date}_",
+        f"data/forecast\\weather_{selected_date}_",
         ""
     )
 
 # Buscamos historico correspondiente.
-    history_file = f"temp/history_{selected_date}_{location_id}"
+    history_file = f"data/history/history_{selected_date}_{location_id}"
 
     if not os.path.exists(history_file):
         print("FAIL | History not found: ", history_file)
@@ -106,7 +136,7 @@ for forecast_file in forecast_files:
         print(e)
 
 # Guardamos dataset
-output_file = f"training/training_{selected_date}.json"
+output_file = f"data/training/training_data_{selected_date}.json"
 
 try:
 

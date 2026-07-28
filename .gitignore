@@ -1,11 +1,8 @@
 # API configuration
 config.json
 
-# Generated weather files
-temp/
-
-# Generated training datasets
-training/
+# Generated datasets
+data/
 
 # Python cache
 __pycache__/
