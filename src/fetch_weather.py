@@ -1,12 +1,6 @@
 import json
 import os
 import requests
-from datetime import datetime, timedelta
-
-# Seleccionamos fecha previa.
-history_date = (
-    datetime.today() - timedelta(days=1)
-).strftime("%Y-%m-%d")
 
 # CARGAR API KEY
 try:
@@ -23,22 +17,22 @@ except Exception as e:
     API_KEY = None
 
 # CONFIGURAR API
-WEATHER_API_URL = "http://api.weatherapi.com/v1/history.json"
+WEATHER_API_URL = "http://api.weatherapi.com/v1/forecast.json"
 
 request_params = {
     "key": API_KEY,
+    "days": 2,
     "aqi": "no",
     "alerts": "no",
-    "dt": history_date
 }
 
 # CREAR CARPETA TEMPORAL
-os.makedirs("temp", exist_ok=True)
+os.makedirs("data/forecast", exist_ok=True)
 
 # OBTENER DATOS DE CADA PUNTO
 for location in locations:
 
-    print(f"\n[+] Getting history for: {location}")
+    print(f"\n[+] Getting weather for: {location}")
 
 # Actualizar coordenadas
     request_params["q"] = location
@@ -63,7 +57,7 @@ for location in locations:
             clean_location = location.replace(",", "_")
             clean_date = forecast_date.replace("-", "")
 
-            filename = f"temp/history_{clean_date}_{clean_location}.json"
+            filename = f"data/forecast/weather_{clean_date}_{clean_location}.json"
 
 # Guardar JSON completo
             with open(filename, "w", encoding="utf-8") as file:
