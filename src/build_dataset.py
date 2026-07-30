@@ -1,48 +1,13 @@
 # BUILD TRAINING DATASET
-
 import os
 import glob
 import json
+import csv
 from datetime import datetime, timedelta
 
 # List of hours to compare.
-""" 
-SUSTITUIMOS la lista completa para ejecutar entrenamiento y tener mas datos.
 HOURS = [
-    "04:00",
-    "05:00",
-    "06:00",
-    "15:00",
-    "16:00",
-    "17:00"
-]
-
-"""
-HOURS = [
-    "00:00",
-    "01:00",
-    "02:00",
-    "03:00",
-    "04:00",
-    "05:00",
-    "06:00",
-    "07:00",
-    "08:00",
-    "09:00",
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-    "18:00",
-    "19:00",
-    "20:00",
-    "21:00",
-    "22:00",
-    "23:00"
+    f"{hour:02d}:00" for hour in range(24)
 ]
 
 # Fecha del archivo del día anterior a hoy.
@@ -52,23 +17,29 @@ selected_date = (
 print("DATE SELECTED:", selected_date)
 
 # Creamos carpeta para el dataset
-os.makedirs("data/training", exist_ok=True)
+FORECAST_FOLDER = "data/forecast"
+HISTORY_FOLDER = "data/history"
+TRAINING_FOLDER = "data/training"
+os.makedirs(TRAINING_FOLDER, exist_ok=True)
 
 training_data = []
 
 # Buscamos los archivos
-forecast_files = glob.glob(f"data/forecast/weather_{selected_date}_*.json")
+forecast_files = glob.glob(
+    f"{FORECAST_FOLDER}/weather_{selected_date}_*.json"
+)
 print("FORECAST FILES:", len(forecast_files))
 
 # Recorremos todos los documentos
 for forecast_file in forecast_files:
-    location_id = forecast_file.replace(
-        f"data/forecast\\weather_{selected_date}_",
-        ""
-    )
+    filename = os.path.basename(forecast_file)
+    location_id = filename.replace(
+    f"weather_{selected_date}_",
+    "")
 
 # Buscamos historico correspondiente.
-    history_file = f"data/history/history_{selected_date}_{location_id}"
+    history_file = (
+        f"{HISTORY_FOLDER}/history_{selected_date}_{location_id}")
 
     if not os.path.exists(history_file):
         print("FAIL | History not found: ", history_file)
@@ -143,11 +114,12 @@ for forecast_file in forecast_files:
         print(e)
 
 # Guardamos dataset
-output_file = f"data/training/training_data_{selected_date}.json"
+json_output = (
+    f"{TRAINING_FOLDER}/training_data_{selected_date}.json")
 
 try:
 
-    with open(output_file, "w", encoding="utf-8") as file:
+    with open(json_output, "w", encoding="utf-8") as file:
         json.dump(
             training_data,
             file,
@@ -156,9 +128,38 @@ try:
         )
 
     print("\nOK | Dataset created")
-    print("SAVED | Records:", len(training_data))
-    print("SAVED |", output_file)
+    print("SAVED |", json_output)
 
 except Exception as e:
     print("FAIL | Could not save dataset")
     print(e)
+
+# Guardamos en CSV
+csv_output = (
+    f"{TRAINING_FOLDER}/dataset_{selected_date}.csv")
+
+try:
+    if len(training_data) > 0:
+        with open(
+            csv_output,
+            "w",
+            newline="",
+            encoding="utf-8"
+        ) as file:
+            writer = csv.DictWriter(
+                file,
+                fieldnames=training_data[0].keys()
+            )
+# Escribimos datos en CSV
+            writer.writeheader()
+            writer.writerows(training_data)
+
+        print("OK | CSV dataset created")
+        print("ROWS |", len(training_data))
+        print("SAVED |", csv_output)
+
+    else:
+        print("FAIL | Dataset is empty")
+
+except Exception as e:
+    print("FAIL | Could not save CSV: ", e)

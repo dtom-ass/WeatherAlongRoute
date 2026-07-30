@@ -12,23 +12,20 @@ Eventually, this project will become a simple desktop/mobile application that an
 
 ---
 
-## Current Files
+## Weather API
 
-### `fetch_weather.py`
+This project uses the free API provided by **WeatherAPI**.
 
-Downloads the weather forecast for all configured locations and stores the complete JSON response.
+Website:
+https://www.weatherapi.com/
 
-### `history_weather.py`
+---
 
-Downloads the historical weather data from the previous day for the same locations.
+## Current Scripts
 
-### `compare_weather.py`
-
-Compares forecast and historical data, then generates a training dataset for future model training.
-
-### `extraction_data.py`
-
-Extracts weather variables for a selected date and hour. Used for testing and data exploration.
+- `fetch_weather.py` → Downloads weather forecasts.
+- `history_weather.py` → Downloads historical weather.
+- `build_dataset.py` → Builds the training dataset (JSON and CSV).
 
 ---
 
@@ -49,19 +46,19 @@ Extracts weather variables for a selected date and hour. Used for testing and da
 2. Download the forecast:
 
 ```bash
-python fetch_weather.py
+python src/fetch_weather.py
 ```
 
 3. Download yesterday's historical data:
 
 ```bash
-python history_weather.py
+python src/history_weather.py
 ```
 
 4. Generate the training dataset:
 
 ```bash
-python compare_weather.py
+python src/build_dataset.py
 ```
 
 ---
@@ -70,10 +67,10 @@ python compare_weather.py
 
 - Forecast downloader
 - Historical weather downloader
-- Automatic training dataset generation
+- Training dataset generation
 
-In Progress
+## In Progress
 
-- Training model
+- XGBoost training model
 - Rain prediction algorithm
-- Graphical interface
+- Desktop/mobile interface
