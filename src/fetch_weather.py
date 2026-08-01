@@ -4,7 +4,8 @@ import requests
 
 # CARGAR API KEY
 try:
-    with open("config.json", "r") as file:
+    config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
+    with open(config_path, "r") as file:
         config = json.load(file)
 
     API_KEY = config["WEATHER_API_KEY"]
