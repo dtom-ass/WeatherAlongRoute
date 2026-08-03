@@ -1,10 +1,12 @@
 import json
-import os
 import requests
+from pathlib import Path
 
+THIS_FILE = Path(__file__).resolve()
+BASE_DIR = THIS_FILE.parent.parent # Ruta anterior (/src)
 # CARGAR API KEY
 try:
-    config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
+    config_path = BASE_DIR / "config.json"
     with open(config_path, "r") as file:
         config = json.load(file)
 
@@ -28,7 +30,8 @@ request_params = {
 }
 
 # CREAR CARPETA TEMPORAL
-os.makedirs("data/forecast", exist_ok=True)
+DATA_DIR = BASE_DIR / "data" / "forecast"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # OBTENER DATOS DE CADA PUNTO
 for location in locations:
@@ -58,7 +61,7 @@ for location in locations:
             clean_location = location.replace(",", "_")
             clean_date = forecast_date.replace("-", "")
 
-            filename = f"data/forecast/weather_{clean_date}_{clean_location}.json"
+            filename = DATA_DIR / f"weather_{clean_date}_{clean_location}.json"
 
 # Guardar JSON completo
             with open(filename, "w", encoding="utf-8") as file:

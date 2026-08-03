@@ -1,45 +1,42 @@
 # BUILD TRAINING DATASET
-import os
-import glob
 import json
 from datetime import datetime, timedelta
 import pandas as pd
-
-# List of hours to compare.
-HOURS = [
-    f"{hour:02d}:00" for hour in range(24)
-]
+from pathlib import Path
 
 # Fecha del archivo del día anterior
 selected_date = (datetime.today() - timedelta(days=1)).strftime("%Y%m%d")
 print("DATE SELECTED:", selected_date)
 
 # Creamos carpeta para el dataset
-FORECAST_FOLDER = "data/forecast"
-HISTORY_FOLDER = "data/history"
-TRAINING_FOLDER = "data/training"
-os.makedirs(TRAINING_FOLDER, exist_ok=True)
+THIS_FILE = Path(__file__).resolve()
+BASE_DIR = THIS_FILE.parent.parent  # Sube de 'src/' a la raíz del proyecto
+DATA_DIR = BASE_DIR / "data"
+
+FORECAST_FOLDER = DATA_DIR / "forecast"
+HISTORY_FOLDER = DATA_DIR / "history"
+TRAINING_FOLDER = DATA_DIR / "training"
+# Crear directorio de salida si no existe
+TRAINING_FOLDER.mkdir(parents=True, exist_ok=True)
 
 training_data = []
 
 # Buscamos los archivos
-forecast_files = glob.glob(
-    f"{FORECAST_FOLDER}/weather_{selected_date}_*.json"
+forecast_files = list(
+    FORECAST_FOLDER.glob(f"weather_{selected_date}_*.json")
 )
 print("FORECAST FILES:", len(forecast_files))
 
 # Recorremos todos los documentos
 for forecast_file in forecast_files:
-    filename = os.path.basename(forecast_file)
-    location_id = filename.replace(
-    f"weather_{selected_date}_",
-    "")
+    # Obtener el ID de la ubicación usando las propiedades de Path
+    filename = forecast_file.name
+    location_id = filename.replace(f"weather_{selected_date}_", "")
 
-# Buscamos historico correspondiente.
-    history_file = (
-        f"{HISTORY_FOLDER}/history_{selected_date}_{location_id}")
+    # Buscamos histórico correspondiente
+    history_file = HISTORY_FOLDER / f"history_{selected_date}_{location_id}"
 
-    if not os.path.exists(history_file):
+    if not history_file.exists():
         print("FAIL | History not found: ", history_file)
         continue
 
@@ -91,6 +88,7 @@ for forecast_file in forecast_files:
         print(f"FAIL | Error processing {forecast_file}: {e}")
 
 # Guardamos datasetif training_data:
+if training_data:
     df = pd.DataFrame(training_data)
 
 # Deduplicación segura basada en la clave única (Fecha, Ubicación, Hora)
@@ -106,8 +104,8 @@ for forecast_file in forecast_files:
     print(f"Rows cleaned: {len(df_clean)}")
 
 # RUTAS DE SALIDA
-    json_clean_output = f"{TRAINING_FOLDER}/training_data_{selected_date}.json"
-    csv_clean_output = f"{TRAINING_FOLDER}/dataset_{selected_date}.csv"
+    json_clean_output = TRAINING_FOLDER / f"training_data_{selected_date}.json"
+    csv_clean_output = TRAINING_FOLDER / f"dataset_{selected_date}.csv"
 
 # GUARDAR JSON LIMPIO
     df_clean.to_json(

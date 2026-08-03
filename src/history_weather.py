@@ -1,16 +1,20 @@
 import json
-import os
 import requests
 from datetime import datetime, timedelta
+from pathlib import Path
 
 # Seleccionamos fecha previa.
 history_date = (
     datetime.today() - timedelta(days=1)
 ).strftime("%Y-%m-%d")
 
+# Path absoluto del .py
+THIS_FILE = Path(__file__).resolve()
+BASE_DIR = THIS_FILE.parent.parent # Ruta anterior (/src)
+
 # CARGAR API KEY
 try:
-    config_path = os.path.join(os.path.dirname(__file__), "..", "config.json")
+    config_path = BASE_DIR / "config.json"
     with open(config_path, "r") as file:
         config = json.load(file)
 
@@ -34,7 +38,8 @@ request_params = {
 }
 
 # CREAR CARPETA TEMPORAL
-os.makedirs("data/history", exist_ok=True)
+DATA_DIR = BASE_DIR / "data" / "history"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # OBTENER DATOS DE CADA PUNTO
 for location in locations:
@@ -64,7 +69,7 @@ for location in locations:
             clean_location = location.replace(",", "_")
             clean_date = forecast_date.replace("-", "")
 
-            filename = f"data/history/history_{clean_date}_{clean_location}.json"
+            filename = DATA_DIR / f"history_{clean_date}_{clean_location}.json"
 
 # Guardar JSON completo
             with open(filename, "w", encoding="utf-8") as file:
