@@ -2,18 +2,16 @@
 import os
 import glob
 import json
-import csv
 from datetime import datetime, timedelta
+import pandas as pd
 
 # List of hours to compare.
 HOURS = [
     f"{hour:02d}:00" for hour in range(24)
 ]
 
-# Fecha del archivo del día anterior a hoy.
-selected_date = (
-    datetime.today() - timedelta(days=1)
-).strftime("%Y%m%d")
+# Fecha del archivo del día anterior
+selected_date = (datetime.today() - timedelta(days=1)).strftime("%Y%m%d")
 print("DATE SELECTED:", selected_date)
 
 # Creamos carpeta para el dataset
@@ -62,104 +60,64 @@ for forecast_file in forecast_files:
         history_hours = history_data["forecast"]["forecastday"][0]["hour"]
 
 # Buscamos las horas de interés
-        for target_hour in HOURS:
+# Iteración paralela $O(N)$ usando zip
+        for f_hour, h_hour in zip(forecast_hours, history_hours):
+ # Extraemos la hora como entero (ej. "2026-08-02 14:00" -> 14)
+            hour_int = int(f_hour["time"].split()[-1].split(":")[0])
 
-            forecast_record = None
-            history_record = None
-
-            for hour in forecast_hours:
-
-                if hour["time"].endswith(target_hour):
-                    forecast_record = hour
-                    break
-
-            for hour in history_hours:
-
-                if hour["time"].endswith(target_hour):
-                    history_record = hour
-                    break
-
-# Si no existe
-            if forecast_record is None or history_record is None:
-                print(f"FAIL | Hour not found: {target_hour}")
-                continue
-
-# Creamos el registro
             record = {
-
                 "date": selected_date,
-                "hour": int(target_hour[:2]),
+                "hour": hour_int,
                 "location": forecast_data["location"]["name"],
-
-                # Forecast features
-                "forecast_temp_c": forecast_record["temp_c"],
-                "forecast_feelslike_c": forecast_record["feelslike_c"],
-                "forecast_wind_kph": forecast_record["wind_kph"],
-                "forecast_pressure_mb": forecast_record["pressure_mb"],
-                "forecast_humidity": forecast_record["humidity"],
-                "forecast_cloud": forecast_record["cloud"],
-                "forecast_precip_mm": forecast_record["precip_mm"],
-                "forecast_chance_of_rain": forecast_record["chance_of_rain"],
-                "forecast_dewpoint_c": forecast_record["dewpoint_c"],
-                "forecast_uv": forecast_record["uv"],
-                "forecast_vis_km": forecast_record["vis_km"],
-                "forecast_is_day": forecast_record["is_day"],
-                # Target
-                "history_precip_mm": history_record["precip_mm"]
+# Forecast features
+                "forecast_temp_c": f_hour.get("temp_c"),
+                "forecast_feelslike_c": f_hour.get("feelslike_c"),
+                "forecast_wind_kph": f_hour.get("wind_kph"),
+                "forecast_pressure_mb": f_hour.get("pressure_mb"),
+                "forecast_humidity": f_hour.get("humidity"),
+                "forecast_cloud": f_hour.get("cloud"),
+                "forecast_precip_mm": f_hour.get("precip_mm"),
+                "forecast_chance_of_rain": f_hour.get("chance_of_rain"),
+                "forecast_dewpoint_c": f_hour.get("dewpoint_c"),
+                "forecast_uv": f_hour.get("uv"),
+                "forecast_vis_km": f_hour.get("vis_km"),
+                "forecast_is_day": f_hour.get("is_day"),
+# Target
+                "history_precip_mm": h_hour.get("precip_mm"),
             }
 
             training_data.append(record)
     except Exception as e:
-        print(f"FAIL | Error processing {forecast_file}")
-        print(e)
+        print(f"FAIL | Error processing {forecast_file}: {e}")
 
-# Guardamos dataset
-json_output = (
-    f"{TRAINING_FOLDER}/training_data_{selected_date}.json")
+# Guardamos datasetif training_data:
+    df = pd.DataFrame(training_data)
 
-try:
+# Deduplicación segura basada en la clave única (Fecha, Ubicación, Hora)
+    initial_rows = len(df)
+    df_clean = df.drop_duplicates(
+        subset=["date", "location", "hour"], keep="first"
+    )
+    removed_rows = initial_rows - len(df_clean)
 
-    with open(json_output, "w", encoding="utf-8") as file:
-        json.dump(
-            training_data,
-            file,
-            indent=4,
-            ensure_ascii=False
-        )
+    print(f"\n--- RESUME ---")
+    print(f"Rows: {initial_rows}")
+    print(f"Deleted: {removed_rows}")
+    print(f"Rows cleaned: {len(df_clean)}")
 
-    print("\nOK | Dataset created")
-    print("SAVED |", json_output)
+# RUTAS DE SALIDA
+    json_clean_output = f"{TRAINING_FOLDER}/training_data_{selected_date}.json"
+    csv_clean_output = f"{TRAINING_FOLDER}/dataset_{selected_date}.csv"
 
-except Exception as e:
-    print("FAIL | Could not save dataset")
-    print(e)
+# GUARDAR JSON LIMPIO
+    df_clean.to_json(
+        json_clean_output, orient="records", indent=4, force_ascii=False
+    )
+    print(f"SAVED JSON | {json_clean_output}")
 
-# Guardamos en CSV
-csv_output = (
-    f"{TRAINING_FOLDER}/dataset_{selected_date}.csv")
+# GUARDAR CSV LIMPIO
+    df_clean.to_csv(csv_clean_output, index=False, encoding="utf-8")
+    print(f"SAVED CSV  | {csv_clean_output}")
 
-try:
-    if len(training_data) > 0:
-        with open(
-            csv_output,
-            "w",
-            newline="",
-            encoding="utf-8"
-        ) as file:
-            writer = csv.DictWriter(
-                file,
-                fieldnames=training_data[0].keys()
-            )
-# Escribimos datos en CSV
-            writer.writeheader()
-            writer.writerows(training_data)
-
-        print("OK | CSV dataset created")
-        print("ROWS |", len(training_data))
-        print("SAVED |", csv_output)
-
-    else:
-        print("FAIL | Dataset is empty")
-
-except Exception as e:
-    print("FAIL | Could not save CSV: ", e)
+else:
+    print("\nFAIL | No data collected. Dataset is empty.")
