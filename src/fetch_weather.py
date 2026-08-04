@@ -1,54 +1,26 @@
 import json
 import requests
-from pathlib import Path
+from config import * # Importamos configuración
 
-THIS_FILE = Path(__file__).resolve()
-BASE_DIR = THIS_FILE.parent.parent # Ruta anterior (/src)
-# CARGAR API KEY
-try:
-    config_path = BASE_DIR / "config.json"
-    with open(config_path, "r") as file:
-        config = json.load(file)
-
-    API_KEY = config["WEATHER_API_KEY"]
-    # DEFINIR RUTA
-    locations = config["LOCATIONS"]
-    print("OK | API Key loaded")
-
-except Exception as e:
-    print("FAIL | Check config.json:", e)
-    API_KEY = None
-
-# CONFIGURAR API
 WEATHER_API_URL = "http://api.weatherapi.com/v1/forecast.json"
-
-request_params = {
+request_params = { # Parametros de Weather API:
     "key": API_KEY,
     "days": 2,
     "aqi": "no",
     "alerts": "no",
 }
 
-# CREAR CARPETA TEMPORAL
-DATA_DIR = BASE_DIR / "data" / "forecast"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
 # OBTENER DATOS DE CADA PUNTO
-for location in locations:
-
-    print(f"\n[+] Getting weather for: {location}")
-
+for location in LOCATIONS:
+    print(f"\n[+] | Getting weather for: {location}")
 # Actualizar coordenadas
     request_params["q"] = location
-
     try:
         response = requests.get(
             WEATHER_API_URL,
-            params=request_params,
-        )
+            params=request_params)
 
         if response.status_code == 200:
-
             print("OK | Request accepted")
 
 # Convertir la respuesta a JSON
@@ -61,7 +33,7 @@ for location in locations:
             clean_location = location.replace(",", "_")
             clean_date = forecast_date.replace("-", "")
 
-            filename = DATA_DIR / f"weather_{clean_date}_{clean_location}.json"
+            filename = FORECAST_DIR / f"weather_{clean_date}_{clean_location}.json"
 
 # Guardar JSON completo
             with open(filename, "w", encoding="utf-8") as file:
@@ -69,8 +41,7 @@ for location in locations:
                     weather_data,
                     file,
                     indent=4,
-                    ensure_ascii=False,
-                )
+                    ensure_ascii=False)
 
             print(f"OK | Data saved: {filename}")
 
