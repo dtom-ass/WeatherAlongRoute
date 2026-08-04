@@ -2,28 +2,17 @@
 import json
 from datetime import datetime, timedelta
 import pandas as pd
-from pathlib import Path
+from config import FORECAST_DIR, HISTORY_DIR, TRAINING_DIR
 
 # Fecha del archivo del día anterior
 selected_date = (datetime.today() - timedelta(days=1)).strftime("%Y%m%d")
 print("DATE SELECTED:", selected_date)
 
-# Creamos carpeta para el dataset
-THIS_FILE = Path(__file__).resolve()
-BASE_DIR = THIS_FILE.parent.parent  # Sube de 'src/' a la raíz del proyecto
-DATA_DIR = BASE_DIR / "data"
-
-FORECAST_FOLDER = DATA_DIR / "forecast"
-HISTORY_FOLDER = DATA_DIR / "history"
-TRAINING_FOLDER = DATA_DIR / "training"
-# Crear directorio de salida si no existe
-TRAINING_FOLDER.mkdir(parents=True, exist_ok=True)
-
 training_data = []
 
 # Buscamos los archivos
 forecast_files = list(
-    FORECAST_FOLDER.glob(f"weather_{selected_date}_*.json")
+    FORECAST_DIR.glob(f"weather_{selected_date}_*.json")
 )
 print("FORECAST FILES:", len(forecast_files))
 
@@ -34,7 +23,7 @@ for forecast_file in forecast_files:
     location_id = filename.replace(f"weather_{selected_date}_", "")
 
     # Buscamos histórico correspondiente
-    history_file = HISTORY_FOLDER / f"history_{selected_date}_{location_id}"
+    history_file = HISTORY_DIR / f"history_{selected_date}_{location_id}"
 
     if not history_file.exists():
         print("FAIL | History not found: ", history_file)
@@ -43,14 +32,8 @@ for forecast_file in forecast_files:
     print(f"\nCOMPARING: {location_id}")
 
     try:
-
-# Abrimos archivo con predicción
-        with open(forecast_file, "r", encoding="utf-8") as file:
-            forecast_data = json.load(file)
-
-# Abrimos historial correspondiente
-        with open(history_file, "r", encoding="utf-8") as file:
-            history_data = json.load(file)
+        forecast_data = json.loads(forecast_file.read_text(encoding="utf-8")) # Abrimos archivo con predicción.
+        history_data = json.loads(history_file.read_text(encoding="utf-8")) # Abrimos archivo con historial.
 
 # Extraemos horas
         forecast_hours = forecast_data["forecast"]["forecastday"][0]["hour"]
@@ -89,13 +72,12 @@ for forecast_file in forecast_files:
 
 # Guardamos datasetif training_data:
 if training_data:
-    df = pd.DataFrame(training_data)
+    df = pd.DataFrame.from_records(training_data)
 
 # Deduplicación segura basada en la clave única (Fecha, Ubicación, Hora)
     initial_rows = len(df)
     df_clean = df.drop_duplicates(
-        subset=["date", "location", "hour"], keep="first"
-    )
+        subset=["date", "location", "hour"], keep="first")
     removed_rows = initial_rows - len(df_clean)
 
     print(f"\n--- RESUME ---")
@@ -104,8 +86,8 @@ if training_data:
     print(f"Rows cleaned: {len(df_clean)}")
 
 # RUTAS DE SALIDA
-    json_clean_output = TRAINING_FOLDER / f"training_data_{selected_date}.json"
-    csv_clean_output = TRAINING_FOLDER / f"dataset_{selected_date}.csv"
+    json_clean_output = TRAINING_DIR / f"training_data_{selected_date}.json"
+    csv_clean_output = TRAINING_DIR / f"dataset_{selected_date}.csv"
 
 # GUARDAR JSON LIMPIO
     df_clean.to_json(
